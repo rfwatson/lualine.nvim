@@ -820,3 +820,50 @@ describe('Branch component', function()
     assert_component('branch', opts, rev)
   end)
 end)
+
+describe('Diagnostics component', function()
+  local assert_comp_ins = helpers.assert_component_instance
+  local sources = {
+    function()
+      return { error = 1, warn = 2, info = 3, hint = 4 }
+    end,
+  }
+
+  it('renders the diagnostics with static symbols', function()
+    local opts = build_component_opts {
+      sources = sources,
+      colored = false,
+      symbols = {
+        error = 'E',
+        warn = 'W',
+        info = 'I',
+        hint = 'H',
+      },
+    }
+    local dc = helpers.init_component('diagnostics', opts)
+    assert_comp_ins(dc, ' E1 W2 I3 H4 ')
+  end)
+
+  it('renders the diagnostics with dynamic symbols', function()
+    local opts = build_component_opts {
+      sources = sources,
+      colored = false,
+      symbols = {
+        error = function(c)
+          return c .. ' foo'
+        end,
+        warn = function(c)
+          return c .. ' bar'
+        end,
+        info = function(c)
+          return c .. ' baz'
+        end,
+        hint = function(c)
+          return c .. ' qux'
+        end,
+      },
+    }
+    local dc = helpers.init_component('diagnostics', opts)
+    assert_comp_ins(dc, ' 1 foo 2 bar 3 baz 4 qux ')
+  end)
+end)

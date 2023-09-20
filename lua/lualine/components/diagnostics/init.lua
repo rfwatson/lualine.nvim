@@ -50,6 +50,14 @@ function M:init(options)
   end
 end
 
+local function render_diagnostic(symbol_or_function, count)
+  if type(symbol_or_function) == 'function' then
+    return symbol_or_function(count)
+  else
+    return symbol_or_function .. count
+  end
+end
+
 function M:update_status()
   local bufnr = vim.api.nvim_get_current_buf()
   local diagnostics_count
@@ -95,13 +103,16 @@ function M:update_status()
       if diagnostics_count[section] ~= nil and (always_visible or diagnostics_count[section] > 0) then
         padding = previous_section and (bgs[previous_section] ~= bgs[section]) and ' ' or ''
         previous_section = section
-        table.insert(result, colors[section] .. padding .. self.symbols[section] .. diagnostics_count[section])
+        table.insert(
+          result,
+          colors[section] .. padding .. render_diagnostic(self.symbols[section], diagnostics_count[section])
+        )
       end
     end
   else
     for _, section in ipairs(self.options.sections) do
       if diagnostics_count[section] ~= nil and (always_visible or diagnostics_count[section] > 0) then
-        table.insert(result, self.symbols[section] .. diagnostics_count[section])
+        table.insert(result, render_diagnostic(self.symbols[section], diagnostics_count[section]))
       end
     end
   end
